@@ -1,0 +1,4 @@
+clusterName: tf-eks-cluster
+serviceAccount:
+  create: false
+  name: aws-load-balancer-controller

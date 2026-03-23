@@ -3,7 +3,7 @@ project_name = "tf-portfolio"
 environment  = "dev"
 
 tags = {
-  Owner       = "your-name"
+  Owner       = "Ahmadreza Sedighi"
   Environment = "dev"
   Project     = "terraform-portfolio"
 }

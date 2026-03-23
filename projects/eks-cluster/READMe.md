@@ -24,3 +24,12 @@ Use subnets from your VPC project.
 ```bash
 terraform init
 terraform apply
+```
+
+## Production Features
+- Private subnets for worker nodes
+- NAT Gateway for outbound traffic
+- IRSA for fine-grained IAM permissions
+- AWS Load Balancer Controller (ALB)
+- Multi-AZ deployment
+- Kubernetes-ready networking

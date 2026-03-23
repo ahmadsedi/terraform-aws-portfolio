@@ -31,10 +31,8 @@ resource "aws_eks_cluster" "this" {
   role_arn = aws_iam_role.eks_cluster.arn
 
   vpc_config {
-    subnet_ids = var.subnet_ids
+    subnet_ids = aws_subnet.private[*].id
   }
-
-  depends_on = [aws_iam_role_policy_attachment.eks_cluster_policy]
 }
 
 # -------------------
@@ -72,15 +70,14 @@ resource "aws_iam_role_policy_attachment" "registry_policy" {
 # Node Group
 # -------------------
 resource "aws_eks_node_group" "this" {
-  cluster_name    = aws_eks_cluster.this.name
-  node_group_name = "${local.name}-nodes"
-  node_role_arn   = aws_iam_role.node_group.arn
-  subnet_ids      = var.subnet_ids
+  cluster_name  = aws_eks_cluster.this.name
+  node_role_arn = aws_iam_role.node_group.arn
+  subnet_ids    = aws_subnet.private[*].id
 
   scaling_config {
-    desired_size = var.desired_capacity
-    max_size     = 3
+    desired_size = 2
     min_size     = 1
+    max_size     = 4
   }
 
   instance_types = [var.node_instance_type]
@@ -99,7 +96,19 @@ resource "helm_release" "nginx" {
   chart      = "ingress-nginx"
 
   values = [
-    file("${path.module}/helm/nginx-values.yaml")
+    file("${path.module}/helm/nginx-values.yml")
+  ]
+
+  depends_on = [aws_eks_node_group.this]
+}
+
+resource "helm_release" "alb_controller" {
+  name       = "aws-load-balancer-controller"
+  repository = "https://aws.github.io/eks-charts"
+  chart      = "aws-load-balancer-controller"
+
+  values = [
+    file("${path.module}/helm/alb-values.yml")
   ]
 
   depends_on = [aws_eks_node_group.this]
