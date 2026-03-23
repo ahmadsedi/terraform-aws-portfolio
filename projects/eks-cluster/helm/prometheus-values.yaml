@@ -1,5 +1,9 @@
 grafana:
   adminPassword: admin
+  ingress:
+    enabled: true
+    hosts:
+      - grafana.ahmadrezadomain.com
   service:
     type: LoadBalancer
 

@@ -42,3 +42,13 @@ terraform apply
 - ArgoCD GitOps deployment
 
 This setup represents a production-ready Kubernetes platform.
+
+## Platform Capabilities
+This platform demonstrates:
+
+- Private Kubernetes cluster (no public API exposure)
+- GitOps deployment using ArgoCD (App of Apps pattern)
+- Secure secrets management via AWS Secrets Manager
+- Automated DNS + TLS (ExternalDNS + Cert Manager)
+- Full observability stack (Prometheus + Grafana)
+- CI/CD pipeline integrated with GitHub Actions

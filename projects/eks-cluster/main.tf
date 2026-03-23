@@ -84,6 +84,21 @@ resource "aws_iam_policy" "external_dns" {
   })
 }
 
+resource "aws_iam_policy" "external_secrets" {
+  name = "ExternalSecretsPolicy"
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [{
+      Effect = "Allow",
+      Action = [
+        "secretsmanager:GetSecretValue"
+      ],
+      Resource = "*"
+    }]
+  })
+}
+
 # -------------------
 # Node Group
 # -------------------
@@ -172,6 +187,12 @@ resource "helm_release" "argocd" {
   values = [
     file("${path.module}/helm/argocd-values.yaml")
   ]
+}
+
+resource "helm_release" "external_secrets" {
+  name       = "external-secrets"
+  repository = "https://charts.external-secrets.io"
+  chart      = "external-secrets"
 }
 
 resource "kubernetes_manifest" "letsencrypt" {
