@@ -66,6 +66,24 @@ resource "aws_iam_role_policy_attachment" "registry_policy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
 }
 
+
+resource "aws_iam_policy" "external_dns" {
+  name = "ExternalDNSPolicy"
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [{
+      Effect = "Allow",
+      Action = [
+        "route53:ChangeResourceRecordSets",
+        "route53:ListHostedZones",
+        "route53:ListResourceRecordSets"
+      ],
+      Resource = "*"
+    }]
+  })
+}
+
 # -------------------
 # Node Group
 # -------------------
@@ -112,4 +130,72 @@ resource "helm_release" "alb_controller" {
   ]
 
   depends_on = [aws_eks_node_group.this]
+}
+
+resource "helm_release" "external_dns" {
+  name       = "external-dns"
+  repository = "https://kubernetes-sigs.github.io/external-dns/"
+  chart      = "external-dns"
+
+  values = [
+    file("${path.module}/helm/external-dns-values.yaml")
+  ]
+
+  depends_on = [aws_eks_node_group.this]
+}
+
+resource "helm_release" "cert_manager" {
+  name       = "cert-manager"
+  repository = "https://charts.jetstack.io"
+  chart      = "cert-manager"
+
+  values = [
+    file("${path.module}/helm/cert-manager-values.yaml")
+  ]
+}
+
+resource "helm_release" "kube_prometheus" {
+  name       = "kube-prometheus-stack"
+  repository = "https://prometheus-community.github.io/helm-charts"
+  chart      = "kube-prometheus-stack"
+
+  values = [
+    file("${path.module}/helm/prometheus-values.yaml")
+  ]
+}
+
+resource "helm_release" "argocd" {
+  name       = "argocd"
+  repository = "https://argoproj.github.io/argo-helm"
+  chart      = "argo-cd"
+
+  values = [
+    file("${path.module}/helm/argocd-values.yaml")
+  ]
+}
+
+resource "kubernetes_manifest" "letsencrypt" {
+  manifest = {
+    apiVersion = "cert-manager.io/v1"
+    kind       = "ClusterIssuer"
+    metadata = {
+      name = "letsencrypt-prod"
+    }
+    spec = {
+      acme = {
+        server = "https://acme-v02.api.letsencrypt.org/directory"
+        email  = "your-email@example.com"
+        privateKeySecretRef = {
+          name = "letsencrypt-prod"
+        }
+        solvers = [{
+          http01 = {
+            ingress = {
+              class = "nginx"
+            }
+          }
+        }]
+      }
+    }
+  }
 }

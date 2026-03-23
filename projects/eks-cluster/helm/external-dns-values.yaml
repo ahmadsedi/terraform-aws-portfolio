@@ -1,0 +1,9 @@
+provider: aws
+
+policy: sync
+
+serviceAccount:
+  create: false
+  name: external-dns
+
+txtOwnerId: eks-cluster

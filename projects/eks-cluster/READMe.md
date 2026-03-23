@@ -33,3 +33,12 @@ terraform apply
 - AWS Load Balancer Controller (ALB)
 - Multi-AZ deployment
 - Kubernetes-ready networking
+
+
+## Advanced Platform Features
+- External DNS (Route53 automation)
+- Cert Manager (automatic TLS via Let’s Encrypt)
+- Prometheus + Grafana monitoring stack
+- ArgoCD GitOps deployment
+
+This setup represents a production-ready Kubernetes platform.
